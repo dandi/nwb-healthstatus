@@ -53,5 +53,4 @@ def load_spec(filename: Union[str, Path]) -> Spec:
         always_merger.merge(deepcopy(base_env), env)
         for env in data.get("environments", [])
     ]
-    print(data["environments"])
     return Spec.parse_obj(data)

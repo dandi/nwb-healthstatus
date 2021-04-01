@@ -1,7 +1,7 @@
 base_environment:
   base-image: python:3.9
   apt:
-    - libhdf5
+    - libhdf5-dev
 
 environments:
   - name: pynwb-2.1.0
