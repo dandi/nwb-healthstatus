@@ -4,18 +4,18 @@ base_environment:
     - libhdf5-dev
 
 environments:
-  - name: pynwb-2.1.0
+  - name: pynwb-1.1.0
     pip:
-      - pynwb==2.1.0
-      - hdmf==1.1.0
-  - name: pynwb-2.2.0
+      - pynwb==1.1.0
+      - hdmf==2.1.0
+  - name: pynwb-1.2.0
     pip:
-      - pynwb==2.2.0
-      - hdmf==1.1.0
-  - name: spikeextractors-1.1.1
+      - pynwb==1.2.0
+      - hdmf==1.6.0
+  - name: spikeextractors-0.9.6
     pip:
-      - pynwb==2.2.0
-      - spikeextractors==1.1.1
+      - pynwb==1.2.0
+      - spikeextractors==0.9.6
   - name: pynwb-latest
     pip: ["pynwb"] 
   - name: pynwb-dev
