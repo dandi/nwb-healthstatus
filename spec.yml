@@ -4,6 +4,8 @@ base_environment:
     - libhdf5-dev
 
 environments:
+  # those are way too old, just for the fun of it to see what happens
+  # with files produced with those older versions
   - name: pynwb-1.1.0
     pip:
       - pynwb==1.1.0
@@ -12,6 +14,11 @@ environments:
     pip:
       - pynwb==1.2.0
       - hdmf==1.6.0
+  # current up to date at 2021/04/01
+  - name: pynwb-1.4.0
+    pip:
+      - pynwb==1.4.0
+      - hdmf==2.4.0
   - name: spikeextractors-0.9.6
     pip:
       - pynwb==1.2.0
