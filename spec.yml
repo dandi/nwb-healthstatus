@@ -1,0 +1,30 @@
+base_environment:
+  base-image: python:3.9
+  apt:
+    - libhdf5
+
+environments:
+  - name: pynwb-2.1.0
+    pip:
+      - pynwb==2.1.0
+      - hdmf==1.1.0
+  - name: pynwb-2.2.0
+    pip:
+      - pynwb==2.2.0
+      - hdmf==1.1.0
+  - name: spikeextractors-1.1.1
+    pip:
+      - pynwb==2.2.0
+      - spikeextractors==1.1.1
+  - name: pynwb-latest
+    pip: ["pynwb"] 
+  - name: pynwb-dev
+    on_startup: |
+      pip install git+https://github.com/NeurodataWithoutBorders/pynwb \
+                  git+https://github.com/hdmf-dev/hdmf
+
+producers:
+  - name: core
+    environments: ['pynwb-2.1.0', 'pynwb-2.3.0']
+  - name: emph_testing_data
+    environments: ['spikeextractors-1.1.1']

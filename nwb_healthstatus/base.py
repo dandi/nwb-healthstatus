@@ -34,7 +34,7 @@ class SampleCase(ABC):
             and {"EXTENSIONS", "FILENAME", "create", "test"}
             <= reduce(or_, (B.__dict__.keys() for B in C.__mro__))
         ):
-                return True
+            return True
         return NotImplemented
 
 

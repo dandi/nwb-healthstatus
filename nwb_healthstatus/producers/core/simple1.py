@@ -2,8 +2,8 @@ import datetime
 import pynwb
 
 metadata = dict(
-    session_description= 'my first synthetic recording', 
-    identifier='EXAMPLE_ID', 
+    session_description= 'my first synthetic recording',
+    identifier='EXAMPLE_ID',
     session_start_time=datetime.datetime(year=2021, month=3, day=3, tzinfo=datetime.timezone.utc),
     experimenter=('Dr. Bilbo Baggins',),
     lab='Bag End Laboratory',
