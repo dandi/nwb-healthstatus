@@ -4,8 +4,10 @@ from inspect import isclass
 from operator import or_
 from types import ModuleType
 from typing import ClassVar, Iterator, Set, Tuple, Type
+
 from hdmf.container import Container
 import pynwb
+
 
 class SampleCase(ABC):
     #: Set of extensions needed by the sample case
@@ -26,10 +28,8 @@ class SampleCase(ABC):
 
     @classmethod
     def __subclasshook__(cls, C):
-        if (
-            cls is SampleCase
-            and {"EXTENSIONS", "create", "test"}
-            <= reduce(or_, (B.__dict__.keys() for B in C.__mro__))
+        if cls is SampleCase and {"EXTENSIONS", "create", "test"} <= reduce(
+            or_, (B.__dict__.keys() for B in C.__mro__)
         ):
             return True
         return NotImplemented

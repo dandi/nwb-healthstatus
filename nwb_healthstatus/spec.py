@@ -3,9 +3,11 @@ from pathlib import Path
 import re
 import subprocess
 from typing import List, Optional, Union
+
 from deepmerge import always_merger
 from pydantic import BaseModel, Field
 import yaml
+
 
 class Environment(BaseModel):
     base_image: str = Field(alias="base-image")
@@ -16,8 +18,11 @@ class Environment(BaseModel):
 
     def generate_dockerfile(self) -> str:
         cmd = [
-            "neurodocker", "generate", "docker",
-            "--base", self.base_image,
+            "neurodocker",
+            "generate",
+            "docker",
+            "--base",
+            self.base_image,
             "--pkg-manager=apt",
         ]
         if self.apt:
@@ -26,9 +31,7 @@ class Environment(BaseModel):
             cmd += [
                 "--miniconda",
                 "create_env=local",
-                "pip_install=" + " ".join(
-                    re.sub(r'\s+', '', p) for p in self.pip
-                )
+                "pip_install=" + " ".join(re.sub(r"\s+", "", p) for p in self.pip),
             ]
         if self.on_startup:
             cmd += ["--add-to-entrypoint", self.on_startup]

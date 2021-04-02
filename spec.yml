@@ -24,7 +24,7 @@ environments:
       - pynwb==1.2.0
       - spikeextractors==0.9.6
   - name: pynwb-latest
-    pip: ["pynwb"] 
+    pip: ["pynwb"]
   - name: pynwb-dev
     on_startup: |
       pip install git+https://github.com/NeurodataWithoutBorders/pynwb \
