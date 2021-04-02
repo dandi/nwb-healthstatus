@@ -14,10 +14,9 @@ metadata = dict(
 
 class Simple1:
     EXTENSIONS = set()
-    FILENAME = "simple1.nwb"
 
     def create(self):
-        return pynwb.NWBFile(**metadata)
+        yield ("core", "simple1.nwb", pynwb.NWBFile(**metadata))
 
     def test(self, nwbfile):
         # TODO: make it more specific to this example

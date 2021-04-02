@@ -3,7 +3,7 @@ from functools import reduce
 from inspect import isclass
 from operator import or_
 from types import ModuleType
-from typing import ClassVar, Iterator, Set, Type
+from typing import ClassVar, Iterator, Set, Tuple, Type
 from hdmf.container import Container
 import pynwb
 
@@ -11,11 +11,8 @@ class SampleCase(ABC):
     #: Set of extensions needed by the sample case
     EXTENSIONS: ClassVar[Set[str]]
 
-    #: Basename for the sample file created by the case
-    FILENAME: ClassVar[str]
-
     @abstractmethod
-    def create(self) -> pynwb.NWBFile:
+    def create(self) -> Iterator[Tuple[str, str, pynwb.NWBFile]]:
         """ Creates a sample NWB file """
         ...
 

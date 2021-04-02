@@ -28,12 +28,12 @@ def create(casefile, overwrite, samples_path):
         exec(p.read_text(), namespace)
         for casecls in get_cases_in_namespace(namespace):
             case = casecls()
-            filepath = sample_dir / producer / case.FILENAME
-            filepath.parent.mkdir(parents=True, exist_ok=True)
-            if overwrite or not filepath.exists():
-                nwbfile = case.create()
-                with pynwb.NWBHDF5IO(str(filepath), "w") as io:
-                    io.write(nwbfile) # , cache_spec=cache_spec)
+            for testsuite, filepath, nwbfile in case.create():
+                filepath = sample_dir / producer / filepath
+                filepath.parent.mkdir(parents=True, exist_ok=True)
+                if overwrite or not filepath.exists():
+                    with pynwb.NWBHDF5IO(str(filepath), "w") as io:
+                        io.write(nwbfile) # , cache_spec=cache_spec)
 
 @sample.command()
 #@click.option("-e", "--environment")
