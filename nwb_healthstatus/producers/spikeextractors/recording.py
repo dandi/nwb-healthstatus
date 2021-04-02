@@ -251,6 +251,9 @@ class Sorters(_CommonBase):
     ]
 
     def create(self):
+        # Disabled because trying to convert the data to an NWBFile isn't
+        # working
+        return
         for se_class, dataset_path, se_kwargs in self.SCENARIOS:
             self.dataset.get(dataset_path)
             for k in [
