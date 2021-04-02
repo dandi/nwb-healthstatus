@@ -28,7 +28,7 @@ class _CommonBase:
         pass
 
 
-def Extractors(_CommonBase):
+class Extractors(_CommonBase):
     # TODO: propose PR to spikeextractors to have these defined in accessible atribute/constant so
     # we do not have to copy/paste them
     # Changes introduced: removed Path.cwd() / "ephy_testing_data"  prefix -- should be a relpath under self.dataset
@@ -58,11 +58,13 @@ def Extractors(_CommonBase):
             #     "kwik",
             #     dict(folder_path=Path("kwik")),
             # ),
-            (
-                se.MEArecRecordingExtractor,
-                "mearec/mearec_test_10s.h5",
-                dict(file_path=Path("mearec", "mearec_test_10s.h5")),
-            ),
+            #
+            # Fails with assertion error:
+            # (
+            #     se.MEArecRecordingExtractor,
+            #     "mearec/mearec_test_10s.h5",
+            #     dict(file_path=Path("mearec", "mearec_test_10s.h5")),
+            # ),
             (
                 se.NeuralynxRecordingExtractor,
                 "neuralynx/Cheetah_v5.7.4/original_data",
@@ -112,7 +114,7 @@ def Extractors(_CommonBase):
             (
                 se.PhyRecordingExtractor,
                 "phy/phy_example_0",
-                dict(folder_path=Path("phy" / "phy_example_0")),
+                dict(folder_path=Path("phy", "phy_example_0")),
             ),
             # Plexon - AssertionError: This file have several channel groups spikeextractors support only one groups
             # (
@@ -139,13 +141,12 @@ def Extractors(_CommonBase):
             if "filename" in se_kwargs:
                 se_kwargs["filename"] = str(se_kwargs["filename"])
             recording = se_class(**se_kwargs)
-            nwbfile = NWBFile()
+            nwbfile = NWBFile(identifier="testing", session_description="testing", session_start_time=datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc))
             se.NwbRecordingExtractor.write_recording(recording, nwbfile=nwbfile, write_scaled=True)
             yield "spikeextractors", f"{self.__class__.__name__}/{se_class.__name__}/{dataset_path}", nwbfile
 
 
-def Sorters(_CommonBase):
-    CONSTRUCTOR = se.NwbSortingExtractor.write_recording
+class Sorters(_CommonBase):
     # TODO: propose PR to spikeextractors to have these defined in accessible atribute/constant so
     # we do not have to copy/paste them
     SCENARIOS = [
@@ -218,9 +219,13 @@ def Sorters(_CommonBase):
                     se_kwargs[k] = self.pt / se_kwargs[k]
             if "filename" in se_kwargs:
                 se_kwargs["filename"] = str(se_kwargs["filename"])
-            recording = se_class(**se_kwargs)
-            with tempfile.TemporaryFile() as tf:
-                se.NwbSortingExtractor.write_sorting(sorting, tf)
-                # TODO: load NWBFile and yield
-                nwfile = ...
+            sorting = se_class(**se_kwargs)
+            sf = sorting.get_sampling_frequency()
+            if sf is None:  # need to set dummy sampling frequency since no associated acquisition in file
+                sf = 30000
+                sorting.set_sampling_frequency(sf)
+            with tempfile.NamedTemporaryFile() as tf:
+                se.NwbSortingExtractor.write_sorting(sorting, tf.name)
+                with pynwb.NWBHDF5IO(tf.name, mode='r') as io:
+                    nwbfile = io.read()
                 yield "spikeextractors", f"{self.__class__.__name__}/{se_class.__name__}/{dataset_path}", nwbfile

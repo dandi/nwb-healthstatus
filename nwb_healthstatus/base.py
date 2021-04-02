@@ -28,7 +28,7 @@ class SampleCase(ABC):
     def __subclasshook__(cls, C):
         if (
             cls is SampleCase
-            and {"EXTENSIONS", "FILENAME", "create", "test"}
+            and {"EXTENSIONS", "create", "test"}
             <= reduce(or_, (B.__dict__.keys() for B in C.__mro__))
         ):
             return True
