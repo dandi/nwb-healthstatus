@@ -1,9 +1,7 @@
 import datetime
 from pathlib import Path
 
-import hdmf
 import numpy as np
-import pandas as pd
 import pynwb
 
 np.random.seed(42)
@@ -21,8 +19,8 @@ metadata = dict(
 )
 serie_length = 10
 acquisition = {
-    "name1": "my_awesome_timeserie",
-    "name2": "my_awesome_timeserie",
+    "name1": "my_awesome_timeserie1",
+    "name2": "my_awesome_timeserie2",
     "data": np.random.random(serie_length),
     "timestamps": np.linspace(0, 0.1, serie_length),
     "unit": "squirrel squared",
@@ -30,57 +28,51 @@ acquisition = {
 }
 
 
-def create():
-    nwbfile = pynwb.NWBFile(**metadata)
-    timeserie1 = pynwb.TimeSeries(
-        name=acquisition["name1"],
-        data=acquisition["data"],
-        timestamps=acquisition["timestamps"],
-        unit=acquisition["unit"],
-    )
-    timeserie2 = pynwb.TimeSeries(
-        name=acquisition["name2"],
-        data=acquisition["data"],
-        timestamps=acquisition["timestamps"],
-        unit=acquisition["unit"],
-    )
-    nwbfile.add_stimulus(timeserie1)
-    nwbfile.add_acquisition(timeserie2)
-    for trial in acquisition["trials"]:
-        nwbfile.add_trial(
-            start_time=trial,
-            stop_time=trial + (acquisition["trials"][1] - acquisition["trials"][0]) / 2,
+class Fleischmann:
+    EXTENSIONS = set()
+    FILENAME = "fleischmann.nwb"
+
+    def create(self):
+        nwbfile = pynwb.NWBFile(**metadata)
+        timeserie1 = pynwb.TimeSeries(
+            name=acquisition["name1"],
+            data=acquisition["data"],
+            timestamps=acquisition["timestamps"],
+            unit=acquisition["unit"],
         )
+        timeserie2 = pynwb.TimeSeries(
+            name=acquisition["name2"],
+            data=acquisition["data"],
+            timestamps=acquisition["timestamps"],
+            unit=acquisition["unit"],
+        )
+        nwbfile.add_acquisition(timeserie1)
+        nwbfile.add_stimulus(timeserie2)
+        for trial in acquisition["trials"]:
+            nwbfile.add_trial(
+                start_time=trial,
+                stop_time=trial
+                + (acquisition["trials"][1] - acquisition["trials"][0]) / 2,
+            )
+        return nwbfile
 
-    return nwbfile
-
-
-def test_basic(nwbfile):
-    # TODO: make it more specific to this example
-    for f, v in metadata.items():
-        assert getattr(nwbfile, f) == v, f"{f}: {getattr(nwbfile, f)!r} vs. {v!r}"
-
-
-if __name__ == "__main__":
-    base_filename = Path(__file__).name
-    env_details = {
-        "nwb": pynwb.__version__,
-        "hdmf": hdmf.__version__,
-    }
-    suffix = "_".join("{}:{}".format(*i) for i in env_details.items())
-
-    filename = f"/tmp/{base_filename}_{suffix}"
-
-    ### this would be executed once for some combinations of hdmf/pynwb
-    ### version and stored indefinetely somewhere
-    nwbfile = create()
-    with pynwb.NWBHDF5IO(filename + ".nwb", "w") as io:
-        io.write(nwbfile)  # , cache_spec=cache_spec)
-    # todo dump into '.yaml' the details of the spec
-
-    ### CI run would load the file and give it away for testing
-    with pynwb.NWBHDF5IO(filename + ".nwb", mode="r") as io:
-        ## capture and display possible warnings
-        obj = io.read()
-
-        test_basic(obj)
+    def test(self, nwbfile):
+        for f, v in metadata.items():
+            assert getattr(nwbfile, f) == v, f"{f}: {getattr(nwbfile, f)!r} vs. {v!r}"
+        np.testing.assert_array_equal(
+            nwbfile.acquisition[acquisition["name1"]].data[:], acquisition["data"]
+        )
+        np.testing.assert_array_equal(
+            nwbfile.acquisition[acquisition["name1"]].timestamps[:],
+            acquisition["timestamps"],
+        )
+        np.testing.assert_array_equal(
+            nwbfile.stimulus[acquisition["name2"]].data[:], acquisition["data"]
+        )
+        np.testing.assert_array_equal(
+            nwbfile.stimulus[acquisition["name2"]].timestamps[:],
+            acquisition["timestamps"],
+        )
+        np.testing.assert_array_equal(
+            nwbfile.trials.columns[0].data[:], acquisition["trials"]
+        )
