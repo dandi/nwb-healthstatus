@@ -39,5 +39,5 @@ environments:
 producers:
   - name: core
     environments: ['pynwb-2.1.0', 'pynwb-2.3.0']
-  - name: emph_testing_data
+  - name: spikeextractors
     environments: ['spikeextractors-1.1.1']
