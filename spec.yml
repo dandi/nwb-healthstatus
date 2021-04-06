@@ -23,6 +23,12 @@ environments:
     pip:
       - pynwb==1.2.0
       - spikeextractors==0.9.6
+      # Needed by spikeextractors tests:
+      - datalad
+      - lxml
+      - neo
+      - pyintan
+      - pyopenephys
   - name: pynwb-latest
     pip: ["pynwb"]
   - name: pynwb-dev
