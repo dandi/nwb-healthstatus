@@ -13,6 +13,7 @@ class Environment(BaseModel):
     base_image: str = Field(alias="base-image")
     name: str
     apt: List[str] = Field(default_factory=list)
+    ndfreeze: Optional[str] = None
     pip: List[str] = Field(default_factory=list)
     on_startup: Optional[str] = None
 
@@ -27,6 +28,8 @@ class Environment(BaseModel):
         ]
         if self.apt:
             cmd += ["--install"] + self.apt
+        if self.ndfreeze is not None:
+            cmd += ["--ndfreeze", f"date={self.ndfreeze}"]
         if self.pip:
             cmd += [
                 "--miniconda",
