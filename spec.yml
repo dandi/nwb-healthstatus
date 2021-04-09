@@ -10,10 +10,14 @@ environments:
     pip:
       - pynwb==1.1.0
       - hdmf==2.1.0
-  - name: pynwb-1.2.0
-    pip:
-      - pynwb==1.2.0
-      - hdmf==1.6.0
+  # reproducible container for environment as of a year ago
+  - name: pynwb-1.2.1
+    base-image: neurodebian:bullseye
+    ndfreeze: 20200201
+    apt:
+      - git
+      - python3-pip
+      - python3-pynwb=1.2.1-1~nd+1
   # current up to date at 2021/04/01
   - name: pynwb-1.4.0
     pip:
