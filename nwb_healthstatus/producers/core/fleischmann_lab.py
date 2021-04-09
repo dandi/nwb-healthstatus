@@ -17,21 +17,28 @@ metadata = dict(
     experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",
     session_id="LONELYMTN",
 )
-serie_length = 10
+CONST = {
+    "serie_length": 10,
+    "ncells": 10,
+}
 timeseries = {
     "name1": "my_awesome_timeserie1",
     "name2": "my_awesome_timeserie2",
-    "data": np.random.random(serie_length),
-    "timestamps": np.linspace(0, 0.1, serie_length),
+    "data": np.random.random(CONST["serie_length"]),
+    "timestamps": np.linspace(0, 0.1, CONST["serie_length"]),
     "unit": "squirrel squared",
     "trials": np.arange(0, 0.1, 0.02),
 }
-ops = {
+ophys = {
     "Ly": 150,
     "Lx": 150,
     "filelist": ["/path/to/tiff/files"],
     "fs": 4.5,
     "nplanes": 3,
+    "ypix": np.random.random(CONST["ncells"]),
+    "xpix": np.random.random(CONST["ncells"]),
+    "lam": np.random.random(CONST["ncells"]),
+    "iscell": np.random.choice(2, CONST["ncells"]),
 }
 
 
@@ -78,7 +85,7 @@ class Fleischmann:
         imaging_plane = nwbfile.create_imaging_plane(
             name="ImagingPlane",
             optical_channel=optical_channel,
-            imaging_rate=ops["fs"],
+            imaging_rate=ophys["fs"],
             description="standard",
             device=device,
             excitation_lambda=600.0,
@@ -89,13 +96,13 @@ class Fleischmann:
         )
         image_series = pynwb.ophys.TwoPhotonSeries(
             name="TwoPhotonSeries",
-            dimension=[ops["Ly"], ops["Lx"]],
-            external_file=(ops["filelist"] if "filelist" in ops else [""]),
+            dimension=[ophys["Ly"], ophys["Lx"]],
+            external_file=(ophys["filelist"] if "filelist" in ophys else [""]),
             imaging_plane=imaging_plane,
             starting_frame=[0],
             format="external",
             starting_time=0.0,
-            rate=ops["fs"] * ops["nplanes"],
+            rate=ophys["fs"] * ophys["nplanes"],
         )
         nwbfile.add_acquisition(image_series)
         img_seg = pynwb.ophys.ImageSegmentation()
@@ -109,6 +116,20 @@ class Fleischmann:
             name="ophys", description="optical physiology processed data"
         )
         ophys_module.add(img_seg)
+
+        for n in range(CONST["ncells"]):
+            pixel_mask = np.array(
+                [
+                    ophys["ypix"][n],
+                    ophys["xpix"][n],
+                    ophys["lam"][n],
+                ]
+            )
+            ps.add_roi(pixel_mask=pixel_mask.reshape((1, 3)))
+        ps.add_column("iscell", "two columns - iscell & probcell", ophys["iscell"])
+        rt_region = ps.create_roi_table_region(
+            region=list(np.arange(0, CONST["ncells"])), description="all ROIs"
+        )
 
         return nwbfile
 
@@ -137,11 +158,18 @@ class Fleischmann:
             .data_interfaces["ImageSegmentation"]
             .plane_segmentations["PlaneSegmentation"]
         )
-        assert PlaneSegmentation.imaging_plane.imaging_rate == ops["fs"]
-        assert nwbfile.acquisition["TwoPhotonSeries"].rate == ops["fs"] * ops["nplanes"]
+        assert PlaneSegmentation.imaging_plane.imaging_rate == ophys["fs"]
         assert (
-            nwbfile.acquisition["TwoPhotonSeries"].external_file[:] == ops["filelist"]
+            nwbfile.acquisition["TwoPhotonSeries"].rate
+            == ophys["fs"] * ophys["nplanes"]
+        )
+        assert (
+            nwbfile.acquisition["TwoPhotonSeries"].external_file[:] == ophys["filelist"]
         )
         np.testing.assert_array_equal(
-            nwbfile.acquisition["TwoPhotonSeries"].dimension[:], [ops["Ly"], ops["Lx"]]
+            nwbfile.acquisition["TwoPhotonSeries"].dimension[:],
+            [ophys["Ly"], ophys["Lx"]],
+        )
+        np.testing.assert_array_equal(
+            PlaneSegmentation["iscell"].data[:], ophys["iscell"]
         )
