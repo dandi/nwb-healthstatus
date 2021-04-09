@@ -17,10 +17,7 @@ metadata = dict(
     experiment_description="I went on an adventure with thirteen dwarves to reclaim vast treasures.",
     session_id="LONELYMTN",
 )
-CONST = {
-    "serie_length": 10,
-    "ncells": 10,
-}
+CONST = {"serie_length": 10, "ncells": 10, "pix_dim": 150}
 timeseries = {
     "name1": "my_awesome_timeserie1",
     "name2": "my_awesome_timeserie2",
@@ -30,15 +27,16 @@ timeseries = {
     "trials": np.arange(0, 0.1, 0.02),
 }
 ophys = {
-    "Ly": 150,
-    "Lx": 150,
+    "Ly": CONST["pix_dim"],
+    "Lx": CONST["pix_dim"],
     "filelist": ["/path/to/tiff/files"],
     "fs": 4.5,
     "nplanes": 3,
-    "ypix": np.random.random(CONST["ncells"]),
-    "xpix": np.random.random(CONST["ncells"]),
+    "ypix": np.random.randint(0, CONST["pix_dim"], CONST["ncells"]),
+    "xpix": np.random.randint(0, CONST["pix_dim"], CONST["ncells"]),
     "lam": np.random.random(CONST["ncells"]),
     "iscell": np.random.choice(2, CONST["ncells"]),
+    "traces": 100 * np.random.rand(CONST["ncells"], CONST["serie_length"]),
 }
 
 
@@ -131,6 +129,20 @@ class Fleischmann:
             region=list(np.arange(0, CONST["ncells"])), description="all ROIs"
         )
 
+        roi_resp_series = (
+            pynwb.ophys.RoiResponseSeries(
+                name="Plane_1",
+                data=ophys["traces"],
+                rois=rt_region,
+                unit="lumens",
+                rate=ophys["fs"],
+            ),
+        )
+        fl = pynwb.ophys.Fluorescence(
+            roi_response_series=roi_resp_series, name="Fluorescence"
+        )
+        ophys_module.add(fl)
+
         return nwbfile
 
     def test(self, nwbfile):
@@ -173,3 +185,10 @@ class Fleischmann:
         np.testing.assert_array_equal(
             PlaneSegmentation["iscell"].data[:], ophys["iscell"]
         )
+
+        roi_resp = (
+            nwbfile.processing["ophys"]
+            .data_interfaces["Fluorescence"]
+            .roi_response_series["Plane_1"]
+        )
+        np.testing.assert_array_equal(roi_resp.data[:], ophys["traces"])
