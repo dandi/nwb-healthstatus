@@ -40,7 +40,7 @@ ophys = {
 }
 
 
-class Fleischmann:
+class FleischmannLab:
     EXTENSIONS = set()
     FILENAME = "fleischmann.nwb"
 
@@ -143,7 +143,7 @@ class Fleischmann:
         )
         ophys_module.add(fl)
 
-        return nwbfile
+        yield ("core", self.FILENAME, nwbfile)
 
     def test(self, nwbfile):
         for f, v in metadata.items():
