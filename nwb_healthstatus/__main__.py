@@ -64,7 +64,7 @@ def test(casefile, samples_path):
             with pynwb.NWBHDF5IO(str(filepath), mode="r") as io:
                 ## TODO: Capture and display possible warnings
                 obj = io.read()
-            case.test(obj)
+                case.test(obj)
 
 
 @main.group()
